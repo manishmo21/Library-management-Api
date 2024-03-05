@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const Book = require('../models/book');
+const Book = require('../Models/bookModels');
 
-// Create a new book
+// Add a new book
 router.post('/', async (req, res) => {
   try {
     const { title, author } = req.body;
-    const book = await Book.create({ title, author });
-    res.status(201).json(book);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const newBook = new Book({ title, author });
+    await newBook.save();
+    res.status(201).json(newBook);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -18,8 +19,8 @@ router.get('/', async (req, res) => {
   try {
     const books = await Book.find();
     res.json(books);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -27,10 +28,12 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
-    if (!book) return res.status(404).json({ message: 'Book not found' });
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
     res.json(book);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -39,21 +42,25 @@ router.patch('/:id', async (req, res) => {
   try {
     const { title, author } = req.body;
     const updatedBook = await Book.findByIdAndUpdate(req.params.id, { title, author }, { new: true });
-    if (!updatedBook) return res.status(404).json({ message: 'Book not found' });
+    if (!updatedBook) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
     res.json(updatedBook);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
-// Delete a book
+// Remoove a book
 router.delete('/:id', async (req, res) => {
   try {
     const deletedBook = await Book.findByIdAndDelete(req.params.id);
-    if (!deletedBook) return res.status(404).json({ message: 'Book not found' });
+    if (!deletedBook) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
     res.json({ message: 'Book deleted' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
